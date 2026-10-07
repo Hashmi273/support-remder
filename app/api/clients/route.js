@@ -1,13 +1,20 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, getKey } from '@/lib/db';
 import { nextReminderAt } from '@/lib/schedule';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
+    const key = getKey();
     const { data, error } = await db().from('clients').select('*').order('created_at', { ascending: false });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      return NextResponse.json({
+        error: error.message,
+        debug_key_len: key ? key.length : 0,
+        debug_key_start: key ? key.substring(0, 15) : 'EMPTY'
+      }, { status: 500 });
+    }
     return NextResponse.json(data.map((c) => ({ ...c, next_reminder_at: nextReminderAt(c) })));
   } catch (err) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
