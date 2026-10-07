@@ -68,10 +68,10 @@ export default function Home() {
     e.preventDefault();
     setErr('');
     const r = editingId
-      ? await fetch('/api/clients/' + editingId, { method: 'PATCH', body: JSON.stringify({ ...form, action: 'edit' }) })
-      : await fetch('/api/clients', { method: 'POST', body: JSON.stringify(form) });
+      ? await fetch('/api/clients/' + editingId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, action: 'edit' }) })
+      : await fetch('/api/clients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
     const d = await r.json();
-    if (!r.ok) return setErr(d.error);
+    if (!r.ok) return setErr(d.error || 'Failed to save client');
     closeFormModal();
     load();
   }
@@ -100,7 +100,7 @@ export default function Home() {
     setErr('');
   }
 
-  const patch = async (id, body) => { await fetch('/api/clients/' + id, { method: 'PATCH', body: JSON.stringify(body) }); load(); };
+  const patch = async (id, body) => { await fetch('/api/clients/' + id, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); load(); };
   const [testing, setTesting] = useState(null);
   async function testSms(c) {
     if (!confirm('Send a real test SMS to ' + c.mobile + ' (' + c.company + ')? SMS charges apply.')) return;
